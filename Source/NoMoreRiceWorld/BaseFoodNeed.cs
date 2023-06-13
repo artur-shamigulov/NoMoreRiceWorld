@@ -18,14 +18,15 @@ public abstract class BaseFoodNeed : Need
     public override bool ShowOnNeedList => this.CurLevelPercentage < 0.5f;
     public override int GUIChangeArrow => this.IsFrozen ? 0 : -1;
     public static ElementsNeeds ElementsNeed = ElementsNeeds.NotDefined;
-    public float FallRatePerTick => (this.pawn.needs.food.FoodFallPerTick / 10f) * currentFallCoeff;
+    public float FallRatePerTick => (this.pawn.needs.food.FoodFallPerTick / 10f) * currentFallCoeff * CoeffFromSetting;
 
     public virtual ElementsNeeds GetElementNeed => ElementsNeed;
+    
+    public float CoeffFromSetting = 1f;
     public abstract string FullDefName();
     public abstract string LackDefName();
 
     private float currentFallCoeff = 1f;
-
     public override void NeedInterval()
     {
         if (this.CurLevelPercentage > 0.75f)

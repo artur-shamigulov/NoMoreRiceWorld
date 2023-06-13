@@ -19,6 +19,8 @@ public class FoodVariatyNeed : Need
     public override int GUIChangeArrow => this.IsFrozen ? 0 : -1;
     public new void SetInitialLevel() => this.CurLevelPercentage = 1f;
     public FoodVariatyToleranceSet Tolerance;
+    public float FallCoeffFromSetting = 1f;
+    
     
     public FoodVariatyCategory CurCategory
     {
@@ -86,7 +88,7 @@ public class FoodVariatyNeed : Need
 
     public override void NeedInterval()
     {
-        this.CurLevel -= FallPerIntervalWithTrait;
+        this.CurLevel -= FallPerIntervalWithTrait * FallCoeffFromSetting;
         Tolerance.NeedInterval();
     }
 
@@ -111,6 +113,9 @@ public class FoodVariatyNeed : Need
         SetInitialLevel();
 
         Tolerance = new FoodVariatyToleranceSet();
+        
+        FallCoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>().FoodVarietyFallCoeff;
         
         List<Trait> allTraits = pawn.story?.traits?.allTraits;
         if (allTraits != null)

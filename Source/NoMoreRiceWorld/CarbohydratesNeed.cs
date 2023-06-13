@@ -16,9 +16,11 @@ public class CarbohydratesNeed: BaseFoodNeed
     {
         return "CarbohydratesLack";
     }
-    
+
     public CarbohydratesNeed(Pawn pawn)
         : base(pawn)
     {
+        CoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+            ).GetSettings<NoMoreRiceWorldSettings>().CarbohydratesFallCoeff;
     }
 }

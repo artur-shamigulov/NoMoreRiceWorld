@@ -20,5 +20,7 @@ public class ProteinsNeed: BaseFoodNeed
     public ProteinsNeed(Pawn pawn)
         : base(pawn)
     {
+        CoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>().ProteinsFallCoeff;
     }
 }

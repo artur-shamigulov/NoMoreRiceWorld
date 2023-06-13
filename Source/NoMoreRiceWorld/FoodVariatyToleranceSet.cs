@@ -9,6 +9,7 @@ public class FoodVariatyToleranceSet: IExposable
 {
     
     private DefMap<ThingDef, float> tolerances = new DefMap<ThingDef, float>();
+    private float FallCoeffFromSetting = 1f; 
     
     public void ExposeData()
     {
@@ -35,6 +36,12 @@ public class FoodVariatyToleranceSet: IExposable
         }
 
         return coeff;
+    }
+
+    public FoodVariatyToleranceSet()
+    {
+        FallCoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>().FoodVarietyToleranceFallCoeff;
     }
 
     public float ConsumeFood(Thing food)
@@ -81,7 +88,7 @@ public class FoodVariatyToleranceSet: IExposable
         {
             if (tolerance.Value > 0)
             {
-                tolerances[tolerance.Key] = Math.Max(0f, tolerance.Value - 150f/240000f);
+                tolerances[tolerance.Key] = Math.Max(0f, (tolerance.Value - 150f/240000f) * FallCoeffFromSetting);
             }
         }
     }

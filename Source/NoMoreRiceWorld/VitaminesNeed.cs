@@ -20,5 +20,7 @@ public class VitaminesNeed: BaseFoodNeed
     public VitaminesNeed(Pawn pawn)
         : base(pawn)
     {
+        CoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>().VitaminsFallCoeff;
     }
 }
