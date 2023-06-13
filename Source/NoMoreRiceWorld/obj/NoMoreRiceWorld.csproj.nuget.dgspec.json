@@ -1,0 +1,61 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/user/NoMoreRiceWorld/Source/NoMoreRiceWorld/NoMoreRiceWorld.csproj": {}
+  },
+  "projects": {
+    "/Users/user/NoMoreRiceWorld/Source/NoMoreRiceWorld/NoMoreRiceWorld.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/user/NoMoreRiceWorld/Source/NoMoreRiceWorld/NoMoreRiceWorld.csproj",
+        "projectName": "NoMoreRiceWorld",
+        "projectPath": "/Users/user/NoMoreRiceWorld/Source/NoMoreRiceWorld/NoMoreRiceWorld.csproj",
+        "packagesPath": "/Users/user/.nuget/packages/",
+        "outputPath": "/Users/user/NoMoreRiceWorld/Source/NoMoreRiceWorld/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/user/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net472"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net472": {
+            "targetAlias": "net472",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net472": {
+          "targetAlias": "net472",
+          "dependencies": {
+            "Lib.Harmony": {
+              "target": "Package",
+              "version": "[2.2.2, )"
+            },
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.2, )",
+              "autoReferenced": true
+            },
+            "System.Net.Http": {
+              "target": "Package",
+              "version": "[4.3.4, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.402/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
