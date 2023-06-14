@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Verse;
 using RimWorld;
+using Debug = UnityEngine.Debug;
 
 namespace NoMoreRiceWorld;
 
@@ -12,7 +13,6 @@ public static class Utils
         float carbCoeff = 0f;
         float protCoeff = 0f;
 
-        Log.Message(FoodUtility.GetFoodKind(thing.def).ToString());
         if (thing.def.IsNutritionGivingIngestible)
         {
             CompIngredients comp = thing.TryGetComp<CompIngredients>();
@@ -82,6 +82,42 @@ public static class Utils
             else if (FoodUtility.GetFoodKind(thing.def) == FoodKind.NonMeat)
             {
                 carbCoeff = 1f;
+            }
+        }
+        else
+        {
+            Building_NutrientPasteDispenser nutrientPasteDispenser = thing as Building_NutrientPasteDispenser;
+            if (nutrientPasteDispenser != null)
+            {
+                Thing dispensable = nutrientPasteDispenser.FindFeedInAnyHopper();
+                if (dispensable != null)
+                {
+                    if (dispensable.def.IsAnimalProduct)
+                    {
+                        protCoeff = 0.5f;
+                        vitCoeff = 0.5f;
+                    }
+                    else if (dispensable.def.IsMeat)
+                    {
+                        protCoeff = 0.75f;
+                        carbCoeff = 0.25f;
+                    }
+                    else if (dispensable.def.IsFungus)
+                    {
+                        protCoeff = 0.5f;
+                        carbCoeff = 0.5f;
+                    }
+                    else if (FoodUtility.GetFoodKind(dispensable) == FoodKind.Meat)
+                    {
+                        protCoeff = 0.75f;
+                        carbCoeff = 0.25f;
+                    }
+                    else if (FoodUtility.GetFoodKind(dispensable) == FoodKind.NonMeat)
+                    {
+                        carbCoeff = 1f;
+                    }
+                }
+                Log.Message($"{carbCoeff}, {protCoeff}, {vitCoeff}");
             }
         }
 

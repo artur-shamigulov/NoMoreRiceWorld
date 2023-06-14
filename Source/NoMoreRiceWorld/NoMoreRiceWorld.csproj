@@ -26,9 +26,6 @@
       <Reference Include="UnityEngine.CoreModule">
         <HintPath>..\..\..\Library\Application Support\Steam\steamapps\common\RimWorld\RimWorldMac.app\Contents\Resources\Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       </Reference>
-      <Reference Include="UnityEngine.UI">
-        <HintPath>..\..\..\Library\Application Support\Steam\steamapps\common\RimWorld\RimWorldMac.app\Contents\Resources\Data\Managed\UnityEngine.UI.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
     <ItemGroup>

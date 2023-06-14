@@ -11,6 +11,19 @@ public static class NoMoreRiceWorld
     {
         var harmony = new Harmony("com.voidfirefly.nomorericeworld");
         harmony.PatchAll();
+        
+        try
+        {
+            ((Action)(() =>
+            {
+                if (LoadedModManager.RunningModsListForReading.Any(x=> x.Name == "Vanilla Nutrient Paste Expanded"))
+                {
+                    harmony.Patch(AccessTools.Method(typeof(VNPE.SomeClass), nameof(FullNameSpaceOfSomeOtherMod.SomeClass.SomeOtherMethod)),
+                        postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(PatchOnSomeMethodFromSomeOtherMod_PostFix)));
+                }
+            }))();
+        }
+        catch (TypeLoadException ex) { }
     }
 }
 
@@ -36,7 +49,8 @@ static class FoodOptimalityPatch
         {
             return;
         }
-        
+
+        Log.Message($"{foodSource.def} {__result} {foodDef.ingestible?.foodType.ToString()}");
         Dictionary<ElementsNeeds, float> coeffs = Utils.GetNeedsAmount(foodSource);
         List<BaseFoodNeed> needs = new List<BaseFoodNeed>()
         {
@@ -63,6 +77,7 @@ static class FoodOptimalityPatch
         {
             __result -= nd.Tolerance.GetCurrentTolerance(foodSource) * 40f;
         }
+        Log.Message($"{foodSource.def} {__result}");
     }
 }
 
