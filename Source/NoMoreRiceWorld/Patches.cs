@@ -18,12 +18,65 @@ public static class NoMoreRiceWorld
             {
                 if (LoadedModManager.RunningModsListForReading.Any(x=> x.Name == "Vanilla Nutrient Paste Expanded"))
                 {
-                    harmony.Patch(AccessTools.Method(typeof(VNPE.SomeClass), nameof(FullNameSpaceOfSomeOtherMod.SomeClass.SomeOtherMethod)),
-                        postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(PatchOnSomeMethodFromSomeOtherMod_PostFix)));
+                    harmony.Patch(AccessTools.Method(typeof(Utils), nameof(Utils.GetNeedsAmount)),
+                        postfix: new HarmonyMethod(typeof(GetNeedsAmountVNPEPatch), nameof(GetNeedsAmountVNPEPatch.Postfix)));
                 }
             }))();
         }
-        catch (TypeLoadException ex) { }
+        catch (TypeLoadException) { }
+    }
+}
+
+static class GetNeedsAmountVNPEPatch
+{
+    public static void Postfix(ref Dictionary<ElementsNeeds, float> __result, Thing thing)
+    {
+        VNPE.Building_NutrientPasteTap nutrientPasteDispenser = thing as VNPE.Building_NutrientPasteTap;
+        List<ThingDef> ingredients = new List<ThingDef>();
+        if (nutrientPasteDispenser != null)
+        {
+            var net = nutrientPasteDispenser.resourceComp.PipeNet;
+            for (int i = 0; i < net.storages.Count; i++)
+            {
+                var parent = net.storages[i].parent;
+                if (parent.TryGetComp<VNPE.CompRegisterIngredients>() is VNPE.CompRegisterIngredients storageIngredients)
+                {
+                    for (int o = 0; o < storageIngredients.ingredients.Count; o++)
+                        ingredients.Add(storageIngredients.ingredients[o]);
+                }
+            }
+        }
+        
+        foreach (ThingDef ingredient in ingredients)
+        {
+            
+            if (ingredient.HasModExtension<ElementsDefModExtension>())
+            {
+                ElementsDefModExtension elements = ingredient.GetModExtension<ElementsDefModExtension>();
+                __result[ElementsNeeds.Vitamines] += elements.Vitamines / ingredients.Count();
+                __result[ElementsNeeds.Carbohydrates] += elements.Carbohydrates / ingredients.Count();
+                __result[ElementsNeeds.Proteins] += elements.Proteins / ingredients.Count();
+            }
+            else if (ingredient.IsAnimalProduct)
+            {
+                __result[ElementsNeeds.Proteins] += 0.5f / ingredients.Count();
+                __result[ElementsNeeds.Vitamines] += 0.5f / ingredients.Count();
+            }
+            else if (ingredient.IsMeat)
+            {
+                __result[ElementsNeeds.Proteins] += 0.75f / ingredients.Count();
+                __result[ElementsNeeds.Carbohydrates] += 0.25f / ingredients.Count();
+            }
+            else if (ingredient.IsFungus)
+            {
+                __result[ElementsNeeds.Proteins] += 0.5f / ingredients.Count();
+                __result[ElementsNeeds.Carbohydrates] += 0.5f / ingredients.Count();
+            }
+            else if (FoodUtility.GetFoodKind(ingredient) == FoodKind.NonMeat)
+            {
+                __result[ElementsNeeds.Carbohydrates] += 1f / ingredients.Count();
+            }
+        }
     }
 }
 
@@ -50,7 +103,6 @@ static class FoodOptimalityPatch
             return;
         }
 
-        Log.Message($"{foodSource.def} {__result} {foodDef.ingestible?.foodType.ToString()}");
         Dictionary<ElementsNeeds, float> coeffs = Utils.GetNeedsAmount(foodSource);
         List<BaseFoodNeed> needs = new List<BaseFoodNeed>()
         {
@@ -70,6 +122,7 @@ static class FoodOptimalityPatch
                     break;
             }
         });
+        
         __result += currentСontentment;
 
         FoodVariatyNeed nd = eater.needs.TryGetNeed<FoodVariatyNeed>();
@@ -77,7 +130,6 @@ static class FoodOptimalityPatch
         {
             __result -= nd.Tolerance.GetCurrentTolerance(foodSource) * 40f;
         }
-        Log.Message($"{foodSource.def} {__result}");
     }
 }
 
@@ -91,13 +143,7 @@ static class ThingsIngestedPatch
         {
             return;
         }
-        Log.Message($"Ate {__instance.def.defName} by {ingester.def.defName.ToString()} for {__result}");
         Dictionary<ElementsNeeds, float> coeffs = Utils.GetNeedsAmount(__instance);
-        foreach (KeyValuePair<ElementsNeeds,float> keyValuePair in coeffs)
-        {
-            Log.Message($"{keyValuePair.Key.ToString()} {keyValuePair.Value}");
-        }
-
         ingester.needs.TryGetNeed<VitaminesNeed>()?.ConsumeAmount(__result * coeffs[VitaminesNeed.ElementsNeed]);
         ingester.needs.TryGetNeed<ProteinsNeed>()?.ConsumeAmount(__result * coeffs[ProteinsNeed.ElementsNeed]);
         ingester.needs.TryGetNeed<CarbohydratesNeed>()?.ConsumeAmount(__result * coeffs[CarbohydratesNeed.ElementsNeed]);

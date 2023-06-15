@@ -34,28 +34,40 @@ public static class Utils
                 carbCoeff = elements.Carbohydrates;
                 protCoeff = elements.Proteins;
             }
-            else if (comp != null && comp.ingredients.Count > 1 )
+            else if (comp != null)
             {
                 foreach (ThingDef ingredient in comp.ingredients)
                 {
-                    if (ingredient.IsAnimalProduct)
+                    if (ingredient.HasModExtension<ElementsDefModExtension>())
                     {
-                        protCoeff = 0.5f / comp.ingredients.Count();
-                        vitCoeff = 0.5f / comp.ingredients.Count();
+                        ElementsDefModExtension elements = ingredient.GetModExtension<ElementsDefModExtension>();
+                        vitCoeff += elements.Vitamines / comp.ingredients.Count();
+                        carbCoeff += elements.Carbohydrates / comp.ingredients.Count();
+                        protCoeff += elements.Proteins / comp.ingredients.Count();
+                    }
+                    else if (ingredient.IsAnimalProduct)
+                    {
+                        protCoeff += 0.5f / comp.ingredients.Count();
+                        vitCoeff += 0.5f / comp.ingredients.Count();
                     }
                     else if (ingredient.IsMeat)
                     {
-                        protCoeff = 0.75f / comp.ingredients.Count();
-                        carbCoeff = 0.25f / comp.ingredients.Count();
+                        protCoeff += 0.75f / comp.ingredients.Count();
+                        carbCoeff += 0.25f / comp.ingredients.Count();
                     }
                     else if (ingredient.IsFungus)
                     {
-                        protCoeff = 0.5f / comp.ingredients.Count();
-                        carbCoeff = 0.5f / comp.ingredients.Count();
+                        protCoeff += 0.5f / comp.ingredients.Count();
+                        carbCoeff += 0.5f / comp.ingredients.Count();
+                    }
+                    else if (FoodUtility.GetFoodKind(ingredient) == FoodKind.Meat)
+                    {
+                        protCoeff += 0.75f / comp.ingredients.Count();
+                        carbCoeff += 0.25f / comp.ingredients.Count();
                     }
                     else if (FoodUtility.GetFoodKind(ingredient) == FoodKind.NonMeat)
                     {
-                        carbCoeff = 1f / comp.ingredients.Count();
+                        carbCoeff += 1f / comp.ingredients.Count();
                     }
                 }
             }
@@ -117,7 +129,6 @@ public static class Utils
                         carbCoeff = 1f;
                     }
                 }
-                Log.Message($"{carbCoeff}, {protCoeff}, {vitCoeff}");
             }
         }
 

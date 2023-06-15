@@ -20,11 +20,17 @@
       <Reference Include="Assembly-CSharp">
         <HintPath>..\..\..\Library\Application Support\Steam\steamapps\common\RimWorld\RimWorldMac.app\Contents\Resources\Data\Managed\Assembly-CSharp.dll</HintPath>
       </Reference>
+      <Reference Include="PipeSystem">
+        <HintPath>..\..\..\Library\Application Support\Steam\steamapps\workshop\content\294100\2023507013\1.4\Assemblies\PipeSystem.dll</HintPath>
+      </Reference>
       <Reference Include="UnityEngine">
         <HintPath>..\..\..\Library\Application Support\Steam\steamapps\common\RimWorld\RimWorldMac.app\Contents\Resources\Data\Managed\UnityEngine.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine.CoreModule">
         <HintPath>..\..\..\Library\Application Support\Steam\steamapps\common\RimWorld\RimWorldMac.app\Contents\Resources\Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      </Reference>
+      <Reference Include="VNPE">
+        <HintPath>..\..\..\Library\Application Support\Steam\steamapps\workshop\content\294100\2920385763\1.4\Assemblies\VNPE.dll</HintPath>
       </Reference>
     </ItemGroup>
 

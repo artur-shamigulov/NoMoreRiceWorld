@@ -15,7 +15,7 @@ public enum ElementsNeeds
 
 public abstract class BaseFoodNeed : Need
 {
-    public override bool ShowOnNeedList => this.CurLevelPercentage < 0.5f;
+    public override bool ShowOnNeedList => this.CurLevelPercentage < 1.5f;
     public override int GUIChangeArrow => this.IsFrozen ? 0 : -1;
     public static ElementsNeeds ElementsNeed = ElementsNeeds.NotDefined;
     public float FallRatePerTick => (this.pawn.needs.food.FoodFallPerTick / 10f) * currentFallCoeff * CoeffFromSetting;
@@ -67,7 +67,7 @@ public abstract class BaseFoodNeed : Need
 
     public void ConsumeAmount(float amount)
     {
-        this.CurLevel = Math.Min(this.CurLevel + (amount / 10), this.MaxLevel);
+        this.CurLevel = Math.Min(this.CurLevel + amount, this.MaxLevel);
     }
 
     private void RemoveHediff(string fullNameRemove)
