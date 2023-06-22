@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Verse;
 using RimWorld;
 using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace NoMoreRiceWorld;
 
@@ -27,14 +28,7 @@ public static class Utils
                 protCoeff = 0.75f;
                 carbCoeff = 0.25f;
             }
-            else if (thing.def.HasModExtension<ElementsDefModExtension>())
-            {
-                ElementsDefModExtension elements = thing.def.GetModExtension<ElementsDefModExtension>();
-                vitCoeff = elements.Vitamines;
-                carbCoeff = elements.Carbohydrates;
-                protCoeff = elements.Proteins;
-            }
-            else if (comp != null)
+            else if (comp != null && comp.ingredients.Any())
             {
                 foreach (ThingDef ingredient in comp.ingredients)
                 {
@@ -71,6 +65,13 @@ public static class Utils
                     }
                 }
             }
+            else if (thing.def.HasModExtension<ElementsDefModExtension>())
+            {
+                ElementsDefModExtension elements = thing.def.GetModExtension<ElementsDefModExtension>();
+                vitCoeff = elements.Vitamines;
+                carbCoeff = elements.Carbohydrates;
+                protCoeff = elements.Proteins;
+            }
             else if (thing.def.IsAnimalProduct)
             {
                 protCoeff = 0.5f;
@@ -94,6 +95,12 @@ public static class Utils
             else if (FoodUtility.GetFoodKind(thing.def) == FoodKind.NonMeat)
             {
                 carbCoeff = 1f;
+            }
+            else
+            {
+                vitCoeff = 0.33f;
+                carbCoeff = 0.33f;
+                protCoeff = 0.33f;
             }
         }
         else
@@ -138,5 +145,22 @@ public static class Utils
             { CarbohydratesNeed.ElementsNeed, carbCoeff },
             { ProteinsNeed.ElementsNeed, protCoeff },
         };
+    }
+}
+
+public class IngredientVariants
+{
+    public float Amount = 0;
+    public List<ThingCount> Ingredients;
+
+    public float AddIngredient(Thing thing, IngredientValueGetter valueGetter, float cup)
+    {
+        if (Ingredients == null)
+            Ingredients = new List<ThingCount>();
+        float vpu = valueGetter.ValuePerUnitOf(thing.def);
+        int amount = Mathf.Min(Mathf.CeilToInt(cup / vpu), thing.stackCount);
+        Ingredients.Add(new ThingCount(thing, amount));
+        Amount += amount * vpu;
+        return amount * vpu;
     }
 }

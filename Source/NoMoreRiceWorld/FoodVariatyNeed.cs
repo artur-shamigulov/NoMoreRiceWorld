@@ -15,13 +15,14 @@ public enum FoodVariatyCategory : byte
 
 public class FoodVariatyNeed : Need
 {
-    // public override bool ShowOnNeedList => this.CurLevelPercentage < 0.5f;
+    public override bool ShowOnNeedList => alwaysShowVarietyNeed || Prefs.DevMode || this.CurLevelPercentage < 0.3f;
     public override int GUIChangeArrow => this.IsFrozen ? 0 : -1;
     public new void SetInitialLevel() => this.CurLevelPercentage = 1f;
     public FoodVariatyToleranceSet Tolerance;
     public float FallCoeffFromSetting = 1f;
-    
-    
+
+    private bool alwaysShowVarietyNeed = false;
+
     public FoodVariatyCategory CurCategory
     {
         get
@@ -114,8 +115,10 @@ public class FoodVariatyNeed : Need
 
         Tolerance = new FoodVariatyToleranceSet();
         
-        FallCoeffFromSetting = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
-        ).GetSettings<NoMoreRiceWorldSettings>().FoodVarietyFallCoeff;
+        var settings = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>();
+        FallCoeffFromSetting = settings.FoodVarietyFallCoeff;
+        alwaysShowVarietyNeed = settings.ShowVarietyNeeds;
         
         List<Trait> allTraits = pawn.story?.traits?.allTraits;
         if (allTraits != null)

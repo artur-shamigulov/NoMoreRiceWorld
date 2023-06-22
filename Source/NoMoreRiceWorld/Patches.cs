@@ -1,6 +1,10 @@
 using RimWorld;
 using Verse;
 using HarmonyLib;
+using UnityEngine;
+using System.Linq;
+using System.Collections;
+using RimWorld.Planet;
 
 namespace NoMoreRiceWorld;
 
@@ -11,6 +15,8 @@ public static class NoMoreRiceWorld
     {
         var harmony = new Harmony("com.voidfirefly.nomorericeworld");
         harmony.PatchAll();
+        LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>();
         
         try
         {
@@ -24,6 +30,7 @@ public static class NoMoreRiceWorld
             }))();
         }
         catch (TypeLoadException) { }
+        
     }
 }
 
@@ -155,31 +162,195 @@ static class ThingsIngestedPatch
 [HarmonyPatch("ShouldHaveNeed")]
 class ShouldHaveNeedPatch
 {
-    static void Postfix(bool __result, Pawn ___pawn, NeedDef nd)
+    static void Postfix(ref bool __result, Pawn ___pawn, NeedDef nd)
     {
-        if(nd.defName != "FoodVariaty")
-            return;
-        if (__result)
+        if (nd.defName == "FoodVariaty")
         {
-            List<Trait> allTraits = ___pawn.story?.traits?.allTraits;
-            if (allTraits != null)
+            if (__result)
             {
-                if (!allTraits.NullOrEmpty<Trait>())
+                if (___pawn.needs?.joy == null)
                 {
-                    foreach (Trait trait in allTraits)
+                    __result = false;
+                    return;
+                }
+                List<Trait> allTraits = ___pawn.story?.traits?.allTraits;
+                if (allTraits != null)
+                {
+                    if (!allTraits.NullOrEmpty<Trait>())
                     {
-                        if (trait.def.defName == "Ascetic" && !trait.Suppressed)
+                        foreach (Trait trait in allTraits)
                         {
-                            __result = false;
+                            if (trait.def.defName == "Ascetic" && !trait.Suppressed)
+                            {
+                                __result = false;
+                            }
                         }
                     }
                 }
-            }
 
-            if (___pawn.Ideo != null && ___pawn.Ideo.IdeoCausesHumanMeatCravings())
+                if (___pawn.Ideo != null && ___pawn.Ideo.IdeoCausesHumanMeatCravings())
+                {
+                    __result = false;
+                }
+            }
+        }
+        else if (ModsConfig.BiotechActive && nd.needClass.IsSubclassOf(typeof(BaseFoodNeed)))
+        {
+            var elementsNeed = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+            ).GetSettings<NoMoreRiceWorldSettings>().XenotypeWithoutElementNeeds;
+            if (___pawn?.genes?.Xenotype != null  && elementsNeed[___pawn.genes.Xenotype])
             {
                 __result = false;
             }
         }
+    }
+}
+
+[HarmonyPatch(typeof(CompIngredients))]
+[HarmonyPatch(nameof(CompIngredients.AllowStackWith))]
+class AllowStackWithPatch
+{
+    static void Postfix(CompIngredients __instance, ref bool __result, Thing otherStack)
+    {
+        if (__result == false)
+        {
+            return;
+        }
+        CompIngredients otherComp = otherStack.TryGetComp<CompIngredients>();
+        if (otherComp == null || otherComp.ingredients.Count == 0)
+        {
+            return;
+        }
+
+        if (__instance.ingredients.Count != otherComp.ingredients.Count)
+        {
+            __result = false;
+            return;
+        }
+
+        foreach (ThingDef ingredient in __instance.ingredients)
+        {
+            if (!otherComp.ingredients.Contains(ingredient))
+            {
+                __result = false;
+                return;
+            }
+        }
+    }
+}
+
+[HarmonyPatch(typeof(WorkGiver_DoBill))]
+[HarmonyPatch("TryFindBestBillIngredientsInSet_AllowMix")]
+class TryFindBestBillIngredientsInSet_AllowMixPatch
+{
+    static void Postfix(WorkGiver_DoBill __instance, ref bool __result, List<Thing> availableThings, Bill bill, List<ThingCount> chosen)
+    {
+        if (IngredientsUsedComponent.UsedIngredients == null)
+        {
+            return;
+        }
+        //Log.Message("---->TryFindBestBillIngredientsInSet_AllowMix");
+        ThingDefCountClass thingDefCountClass = bill.recipe?.products?.First();
+        //Log.Message($"IS thingDefCountClass null - {thingDefCountClass.thingDef.defName} {thingDefCountClass.thingDef.IsNutritionGivingIngestible}");
+        if (thingDefCountClass != null && thingDefCountClass.thingDef.IsNutritionGivingIngestible)
+        {
+            //Log.Message("---->Try search variants");
+            List<IngredientVariants> variants = new List<IngredientVariants>();
+            Log.Message("Before "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
+            availableThings.SortBy<Thing, int>( x => RegisterIngredientPatch.CountInQueue(x.def));
+            Log.Message("After "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
+            chosen.Clear();
+            foreach (IngredientCount ingredient in bill.recipe.ingredients)
+            {
+                float baseCount = ingredient.GetBaseCount();
+                foreach(Thing availableThing in availableThings)
+                {
+                    if (ingredient.filter.Allows(availableThing) &&
+                        (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableThing)))
+                    {
+                        IngredientVariants variant = new IngredientVariants();
+                        //Log.Message("Add first ingredient");
+                        variant.AddIngredient(
+                            availableThing, bill.recipe.IngredientValueGetter, baseCount);
+                        if (baseCount > variant.Amount)
+                        {
+                            //Log.Message("Not enough try to find others ingredients");
+                            for(int index = availableThings.IndexOf(availableThing); index < availableThings.Count; index++)
+                            {
+                                Thing otherThing = availableThings[index];
+                                if (ingredient.filter.Allows(otherThing) &&
+                                    (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(otherThing)))
+                                {
+                                    //Log.Message($"Add {index} ingredient");
+                                    variant.AddIngredient(
+                                        otherThing, bill.recipe.IngredientValueGetter, baseCount - variant.Amount);
+                                    if (baseCount <= variant.Amount)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (baseCount <= variant.Amount)
+                        {
+                            variants.Add(variant);
+                            Log.Message("Variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
+                        }
+                        else
+                        {
+                            Log.Message("Not variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
+                        }
+                    }
+                }
+
+                if (variants.Count > 0)
+                {
+                    chosen.AddRange(variants.First().Ingredients);
+                }
+                
+            }
+            return;
+        }
+        //Log.Message(string.Join(",", chosen.Select(x => x.Thing.def.defName.ToString())));
+        //Log.Message(string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
+        //Log.Message("<----TryFindBestBillIngredientsInSet_AllowMix");
+    }
+}
+
+[HarmonyPatch(typeof(CompIngredients))]
+[HarmonyPatch(nameof(CompIngredients.RegisterIngredient))]
+static class RegisterIngredientPatch
+{
+    
+    static public void Postfix(ThingDef def)
+    {
+        if (IngredientsUsedComponent.UsedIngredients[def] == null)
+        {
+            IngredientsUsedComponent.UsedIngredients[def] = new Queue<int>();
+        }
+        IngredientsUsedComponent.UsedIngredients[def].Enqueue(Find.TickManager.TicksGame);
+    }
+
+    static public int CountInQueue(ThingDef def)
+    {
+        if (IngredientsUsedComponent.UsedIngredients[def] == null)
+        {
+            return 0;
+        }
+
+        while (IngredientsUsedComponent.UsedIngredients[def].Count > 0)
+        {
+            if (IngredientsUsedComponent.UsedIngredients[def].Peek() + 60000 < Find.TickManager.TicksGame)
+            {
+                IngredientsUsedComponent.UsedIngredients[def].Dequeue();
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return IngredientsUsedComponent.UsedIngredients[def].Count;
     }
 }

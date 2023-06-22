@@ -49,7 +49,7 @@ public class FoodVariatyToleranceSet: IExposable
         float coeff = 1f;
         List<ThingDef> ingredients = new List<ThingDef>(); 
         CompIngredients comp = food.TryGetComp<CompIngredients>();
-        if (comp != null && comp.ingredients.Count > 1)
+        if (comp != null && comp.ingredients.Count > 0)
         {
             comp.ingredients.ForEach((ThingDef x) => ingredients.Add(x));
         }
@@ -61,7 +61,7 @@ public class FoodVariatyToleranceSet: IExposable
         foreach (ThingDef foodDef in ingredients)
         {
             coeff -= tolerances[foodDef] / ingredients.Count();
-            tolerances[foodDef] = Math.Min(tolerances[foodDef] + 0.5f, 1f);
+            tolerances[foodDef] = Math.Min(tolerances[foodDef] + (0.5f / ingredients.Count()), 1f);
         }
         
         return coeff;

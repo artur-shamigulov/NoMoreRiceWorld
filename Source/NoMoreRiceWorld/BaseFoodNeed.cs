@@ -15,7 +15,7 @@ public enum ElementsNeeds
 
 public abstract class BaseFoodNeed : Need
 {
-    public override bool ShowOnNeedList => this.CurLevelPercentage < 1.5f;
+    public override bool ShowOnNeedList => alwaysShowElementNeeds || Prefs.DevMode || this.CurLevelPercentage < 0.25f;
     public override int GUIChangeArrow => this.IsFrozen ? 0 : -1;
     public static ElementsNeeds ElementsNeed = ElementsNeeds.NotDefined;
     public float FallRatePerTick => (this.pawn.needs.food.FoodFallPerTick / 10f) * currentFallCoeff * CoeffFromSetting;
@@ -27,6 +27,7 @@ public abstract class BaseFoodNeed : Need
     public abstract string LackDefName();
 
     private float currentFallCoeff = 1f;
+    private bool alwaysShowElementNeeds = false;
     public override void NeedInterval()
     {
         if (this.CurLevelPercentage > 0.75f)
@@ -63,10 +64,16 @@ public abstract class BaseFoodNeed : Need
         this.threshPercents = new List<float>();
         this.threshPercents.Add(0.75f);
         this.threshPercents.Add(0.25f);
+        alwaysShowElementNeeds = LoadedModManager.GetMod<NoMoreRiceWorldMod>(
+        ).GetSettings<NoMoreRiceWorldSettings>().ShowElementsNeeds;
     }
 
     public void ConsumeAmount(float amount)
     {
+        if (Prefs.DevMode)
+        {
+            Log.Message($"[{this.def.defName}] ConsumeAmount, amount = {amount}");
+        }
         this.CurLevel = Math.Min(this.CurLevel + amount, this.MaxLevel);
     }
 
