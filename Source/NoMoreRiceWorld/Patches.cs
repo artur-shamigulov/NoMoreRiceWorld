@@ -216,8 +216,12 @@ class AllowStackWithPatch
         {
             return;
         }
+        if (LoadedModManager.GetMod<NoMoreRiceWorldMod>().AllowStackWithDiffIngredients)
+        {
+            return;
+        }
         CompIngredients otherComp = otherStack.TryGetComp<CompIngredients>();
-        if (otherComp == null || otherComp.ingredients.Count == 0)
+        if (otherComp == null)
         {
             return;
         }
@@ -245,7 +249,15 @@ class TryFindBestBillIngredientsInSet_AllowMixPatch
 {
     static void Postfix(WorkGiver_DoBill __instance, ref bool __result, List<Thing> availableThings, Bill bill, List<ThingCount> chosen)
     {
+        if (__result == false)
+        {
+            return;
+        }
         if (IngredientsUsedComponent.UsedIngredients == null)
+        {
+            return;
+        }
+        if (LoadedModManager.GetMod<NoMoreRiceWorldMod>().DisableFoodVarietyCooking)
         {
             return;
         }
@@ -255,29 +267,33 @@ class TryFindBestBillIngredientsInSet_AllowMixPatch
         if (thingDefCountClass != null && thingDefCountClass.thingDef.IsNutritionGivingIngestible)
         {
             //Log.Message("---->Try search variants");
-            List<IngredientVariants> variants = new List<IngredientVariants>();
-            Log.Message("Before "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
-            availableThings.SortBy<Thing, int>( x => RegisterIngredientPatch.CountInQueue(x.def));
-            Log.Message("After "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
+            //Log.Message("Before "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
+            availableThings.SortBy<Thing, int>( x => IngredientsUsedComponent.CountInQueue(x.def));
+            
+            List<Thing> localAvailableThings = availableThings.FindAll(
+                x =>
+                    chosen.Any(y => (y.Thing.Position - x.Position).LengthHorizontal < 20));
+            //Log.Message("After "+string.Join(",", availableThings.Select(x => x.def.defName.ToString())));
             chosen.Clear();
             foreach (IngredientCount ingredient in bill.recipe.ingredients)
             {
                 float baseCount = ingredient.GetBaseCount();
-                foreach(Thing availableThing in availableThings)
+                IngredientVariants variant = new IngredientVariants();
+                foreach(Thing availableThing in localAvailableThings)
                 {
+                    //Log.Message($"Used times: {IngredientsUsedComponent.CountInQueue(availableThing.def)}");
                     if (ingredient.filter.Allows(availableThing) &&
                         (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableThing)))
                     {
-                        IngredientVariants variant = new IngredientVariants();
                         //Log.Message("Add first ingredient");
                         variant.AddIngredient(
                             availableThing, bill.recipe.IngredientValueGetter, baseCount);
                         if (baseCount > variant.Amount)
                         {
                             //Log.Message("Not enough try to find others ingredients");
-                            for(int index = availableThings.IndexOf(availableThing); index < availableThings.Count; index++)
+                            for(int index = localAvailableThings.IndexOf(availableThing) + 1; index < localAvailableThings.Count; index++)
                             {
-                                Thing otherThing = availableThings[index];
+                                Thing otherThing = localAvailableThings[index];
                                 if (ingredient.filter.Allows(otherThing) &&
                                     (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(otherThing)))
                                 {
@@ -294,21 +310,16 @@ class TryFindBestBillIngredientsInSet_AllowMixPatch
 
                         if (baseCount <= variant.Amount)
                         {
-                            variants.Add(variant);
-                            Log.Message("Variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
+                            chosen.AddRange(variant.Ingredients);
+                            //Log.Message("Variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
+                            break;
                         }
-                        else
-                        {
-                            Log.Message("Not variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
-                        }
+                        //else
+                        //{
+                            //Log.Message("Not variant" + string.Join("; ", variant.Ingredients.Select(x => x.Thing.def.defName + "-" + x.Count)));
+                        //}
                     }
                 }
-
-                if (variants.Count > 0)
-                {
-                    chosen.AddRange(variants.First().Ingredients);
-                }
-                
             }
             return;
         }
@@ -320,37 +331,16 @@ class TryFindBestBillIngredientsInSet_AllowMixPatch
 
 [HarmonyPatch(typeof(CompIngredients))]
 [HarmonyPatch(nameof(CompIngredients.RegisterIngredient))]
-static class RegisterIngredientPatch
+class RegisterIngredientPatch
 {
-    
     static public void Postfix(ThingDef def)
     {
+        Log.Message($"CountInQueue: {def.defName}");
         if (IngredientsUsedComponent.UsedIngredients[def] == null)
         {
-            IngredientsUsedComponent.UsedIngredients[def] = new Queue<int>();
+            IngredientsUsedComponent.UsedIngredients[def] = new IngredientsUsedComponentQueue();
         }
-        IngredientsUsedComponent.UsedIngredients[def].Enqueue(Find.TickManager.TicksGame);
-    }
-
-    static public int CountInQueue(ThingDef def)
-    {
-        if (IngredientsUsedComponent.UsedIngredients[def] == null)
-        {
-            return 0;
-        }
-
-        while (IngredientsUsedComponent.UsedIngredients[def].Count > 0)
-        {
-            if (IngredientsUsedComponent.UsedIngredients[def].Peek() + 60000 < Find.TickManager.TicksGame)
-            {
-                IngredientsUsedComponent.UsedIngredients[def].Dequeue();
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        return IngredientsUsedComponent.UsedIngredients[def].Count;
+        IngredientsUsedComponent.UsedIngredients[def].componentQueue.Enqueue(Find.TickManager.TicksGame);
+        Log.Message($"CountInQueue: {IngredientsUsedComponent.CountInQueue(def)}");
     }
 }

@@ -16,6 +16,9 @@ namespace NoMoreRiceWorld
         public float FoodVarietyToleranceFallCoeff = 1f;
         public bool ShowElementsNeeds;
         public bool ShowVarietyNeeds;
+        public bool DisableFoodVarietyCooking;
+        public bool AllowStackWithDiffIngredients;
+        
         private DefMap<RimWorld.XenotypeDef, bool> xenotypeWithoutElementNeeds;
 
         public DefMap<RimWorld.XenotypeDef, bool> XenotypeWithoutElementNeeds
@@ -31,6 +34,8 @@ namespace NoMoreRiceWorld
         {
             Scribe_Values.Look(ref ShowElementsNeeds, "ShowElementsNeeds", false);
             Scribe_Values.Look(ref ShowVarietyNeeds, "ShowVarietyNeeds", false);
+            Scribe_Values.Look(ref DisableFoodVarietyCooking, "ShowVarietyNeeds", false);
+            Scribe_Values.Look(ref AllowStackWithDiffIngredients, "ShowVarietyNeeds", false);
             Scribe_Values.Look(ref VitaminsFallCoeff, "vitaminsFallCoeff", 1f);
             Scribe_Values.Look(ref ProteinsFallCoeff, "proteinsFallCoeff", 1f);
             Scribe_Values.Look(ref CarbohydratesFallCoeff, "carbohydratesFallCoeff", 1f);
@@ -45,6 +50,33 @@ namespace NoMoreRiceWorld
     {
         private NoMoreRiceWorldSettings settings;
         private Vector2 scrollPosition;
+
+        public bool DisableFoodVarietyCooking
+        {
+            get
+            {
+                if (settings == null)
+                {
+                    settings = GetSettings<NoMoreRiceWorldSettings>();
+                }
+
+                return settings.DisableFoodVarietyCooking;
+            }
+        }
+        
+        public bool AllowStackWithDiffIngredients
+        {
+            get
+            {
+                if (settings == null)
+                {
+                    settings = GetSettings<NoMoreRiceWorldSettings>();
+                }
+
+                return settings.AllowStackWithDiffIngredients;
+            }
+        }
+
         public NoMoreRiceWorldMod(ModContentPack content) : base(content)
         {
             scrollPosition = Vector2.zero;
@@ -59,6 +91,8 @@ namespace NoMoreRiceWorld
             listingStandard.Begin(inRect);
             listingStandard.CheckboxLabeled("Always show elements needs", ref settings.ShowElementsNeeds, 0);
             listingStandard.CheckboxLabeled("Always show variety need", ref settings.ShowVarietyNeeds, 0);
+            listingStandard.CheckboxLabeled("Allow stacking food with different ingredients", ref settings.AllowStackWithDiffIngredients, 0);
+            listingStandard.CheckboxLabeled("Disable food variety cooking", ref settings.DisableFoodVarietyCooking, 0);
             listingStandard.Label($"Vitamins fall {settings.VitaminsFallCoeff.ToStringPercent()}");
             settings.VitaminsFallCoeff = listingStandard.Slider(settings.VitaminsFallCoeff, 0f, 10f);
             listingStandard.Label($"Proteins fall {settings.ProteinsFallCoeff.ToStringPercent()}");
