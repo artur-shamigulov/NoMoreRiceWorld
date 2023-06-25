@@ -4,15 +4,19 @@
         <mods>
             <li>Vanilla Brewing Expanded - Coffees and Teas</li>
         </mods>
-        <match Class="PatchOperationAddModExtension">
-            <xpath>Defs/ThingDef[defName="VCE_RawLemon"]</xpath>
-            <value>
-                <li Class="NoMoreRiceWorld.ElementsDefModExtension">
-                    <Vitamines>0.5</Vitamines>
-                    <Carbohydrates>0.5</Carbohydrates>
-                    <Proteins>0</Proteins>
+        <match Class="PatchOperationSequence">
+            <operations>
+                <li Class="PatchOperationAddModExtension" MayRequire="VanillaExpanded.VPlantsE">
+                    <xpath>Defs/ThingDef[defName="VCE_RawLemon"]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.5</Vitamines>
+                            <Carbohydrates>0.5</Carbohydrates>
+                            <Proteins>0</Proteins>
+                        </li>
+                    </value>
                 </li>
-            </value>
+            </operations>
         </match>
     </Operation>
 </Patch>
