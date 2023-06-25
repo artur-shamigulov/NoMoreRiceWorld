@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+    <Operation Class="PatchOperationFindMod">
+        <mods>
+            <li>Vanilla Plants Expanded</li>
+        </mods>
+        <match Class="PatchOperationSequence">
+            <operations>
+                <li Class="PatchOperationAddModExtension">
+                    <xpath>Defs/ThingDef[
+                        defName="VCE_RawApple" or
+                        defName="VCE_RawPeach" or
+                        defName="VCE_RawCherry" or
+                        defName="VCE_RawPlum" or
+                        defName="VCE_RawPear" or
+                        defName="VCE_RawPricklyPear" or
+                        defName="VCE_Bearberry" or
+                        defName="VCE_RawBanana" or
+                        defName="VCE_RawOrange" or
+                        defName="VCE_RawOnion" or
+                        defName="VCE_RawPumpkin" or
+                        defName="VCE_RawPepper" or
+                        defName="VCE_RawEggplant" or
+                        defName="VCE_RawCabbage" or
+                        defName="VCE_RawBeets" or
+                        defName="VCE_RawTomatoes"
+                    ]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.5</Vitamines>
+                            <Carbohydrates>0.5</Carbohydrates>
+                            <Proteins>0</Proteins>
+                        </li>
+                    </value>
+                </li>
+                <li Class="PatchOperationAddModExtension">
+                    <xpath>Defs/ThingDef[defName="VCE_RawPeas"]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.5</Vitamines>
+                            <Carbohydrates>0.5</Carbohydrates>
+                            <Proteins>0.3</Proteins>
+                        </li>
+                    </value>
+                </li>
+                <li Class="PatchOperationAddModExtension">
+                    <xpath>Defs/ThingDef[defName="VCE_RawPrunes"]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.4</Vitamines>
+                            <Carbohydrates>0.4</Carbohydrates>
+                            <Proteins>0</Proteins>
+                        </li>
+                    </value>
+                </li>
+            </operations>
+        </match>
+    </Operation>
+</Patch>
