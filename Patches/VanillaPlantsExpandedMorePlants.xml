@@ -128,7 +128,7 @@
                         </li>
                     </value>
                 </li>
-                <li Class="PatchOperationAddModExtension">
+                <li Class="PatchOperationAddModExtension" MayRequire="VanillaExpanded.VCookE">
                     <xpath>Defs/ThingDef[defName="VCE_RawOats"]</xpath>
                     <value>
                         <li Class="NoMoreRiceWorld.ElementsDefModExtension">
