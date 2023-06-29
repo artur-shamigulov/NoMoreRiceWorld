@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+    <Operation Class="PatchOperationFindMod">
+        <mods>
+            <li>Vanilla Cooking Expanded - Sushi</li>
+        </mods>
+        <match Class="PatchOperationSequence">
+            <operations>
+                <li Class="PatchOperationAddModExtension">
+                    <xpath>Defs/ThingDef[defName="VCE_RawSoybean"]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.5</Vitamines>
+                            <Carbohydrates>0.7</Carbohydrates>
+                            <Proteins>0</Proteins>
+                        </li>
+                    </value>
+                </li>
+                <li Class="PatchOperationAddModExtension">
+                    <xpath>Defs/ThingDef[defName="VCE_RawWasabi"]</xpath>
+                    <value>
+                        <li Class="NoMoreRiceWorld.ElementsDefModExtension">
+                            <Vitamines>0.5</Vitamines>
+                            <Carbohydrates>0.5</Carbohydrates>
+                            <Proteins>0</Proteins>
+                        </li>
+                    </value>
+                </li>
+            </operations>
+        </match>
+    </Operation>
+</Patch>
