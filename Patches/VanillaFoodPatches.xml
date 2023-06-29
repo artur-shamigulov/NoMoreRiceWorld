@@ -44,9 +44,9 @@
         <xpath>Defs/ThingDef[defName="RawPotatoes" or defName="RawToxipotato"]</xpath>
         <value>
             <li Class="NoMoreRiceWorld.ElementsDefModExtension">
-                <Vitamines>0.1</Vitamines>
+                <Vitamines>0.07</Vitamines>
                 <Carbohydrates>0.9</Carbohydrates>
-                <Proteins>0.05</Proteins>
+                <Proteins>0</Proteins>
             </li>
         </value>
     </Operation>
@@ -54,9 +54,9 @@
         <xpath>Defs/ThingDef[defName="RawRice" or defName="RawCorn"]</xpath>
         <value>
             <li Class="NoMoreRiceWorld.ElementsDefModExtension">
-                <Vitamines>0.1</Vitamines>
+                <Vitamines>0.07</Vitamines>
                 <Carbohydrates>0.9</Carbohydrates>
-                <Proteins>0.07</Proteins>
+                <Proteins>0</Proteins>
             </li>
         </value>
     </Operation>
