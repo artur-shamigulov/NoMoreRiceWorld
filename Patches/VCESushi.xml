@@ -12,7 +12,7 @@
                         <li Class="NoMoreRiceWorld.ElementsDefModExtension">
                             <Vitamines>0.5</Vitamines>
                             <Carbohydrates>0.7</Carbohydrates>
-                            <Proteins>0.7</Proteins>
+                            <Proteins>0</Proteins>
                         </li>
                     </value>
                 </li>
