@@ -158,6 +158,31 @@ static class ThingsIngestedPatch
     }
 }
 
+[HarmonyPatch(typeof(Thing))]
+[HarmonyPatch("PrePostIngested")]
+class PatchPrePostIngested
+{
+    static public Dictionary<Thing, bool> IsHumanCorpseOrMeat = new Dictionary<Thing, bool>();
+    static void Postfix(Thing __instance, ref Pawn ingester)
+    {
+        if (!IsHumanCorpseOrMeat.ContainsKey(__instance))
+        {
+            IsHumanCorpseOrMeat.Add(__instance, FoodUtility.IsHumanlikeCorpseOrHumanlikeMeat(__instance, __instance.def));
+        }
+    }
+
+    public static bool Pop(Thing __instance)
+    {
+        if (IsHumanCorpseOrMeat.ContainsKey(__instance))
+        {
+            bool response = IsHumanCorpseOrMeat[__instance];
+            IsHumanCorpseOrMeat.Remove(__instance);
+            return response;
+        }
+        return false;
+    }
+}
+
 [HarmonyPatch(typeof(Pawn_NeedsTracker))]
 [HarmonyPatch("ShouldHaveNeed")]
 class ShouldHaveNeedPatch

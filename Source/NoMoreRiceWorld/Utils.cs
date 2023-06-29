@@ -17,7 +17,7 @@ public static class Utils
         if (thing.def.IsNutritionGivingIngestible)
         {
             CompIngredients comp = thing.TryGetComp<CompIngredients>();
-            if (FoodUtility.IsHumanlikeCorpseOrHumanlikeMeat(thing, thing.def))
+            if (PatchPrePostIngested.Pop(thing))
             {
                 vitCoeff = 0.33f;
                 carbCoeff = 0.33f;
