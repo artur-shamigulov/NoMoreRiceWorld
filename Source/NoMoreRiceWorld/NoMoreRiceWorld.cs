@@ -34,8 +34,8 @@ namespace NoMoreRiceWorld
         {
             Scribe_Values.Look(ref ShowElementsNeeds, "ShowElementsNeeds", false);
             Scribe_Values.Look(ref ShowVarietyNeeds, "ShowVarietyNeeds", false);
-            Scribe_Values.Look(ref DisableFoodVarietyCooking, "ShowVarietyNeeds", false);
-            Scribe_Values.Look(ref AllowStackWithDiffIngredients, "ShowVarietyNeeds", false);
+            Scribe_Values.Look(ref DisableFoodVarietyCooking, "DisableFoodVarietyCooking", false);
+            Scribe_Values.Look(ref AllowStackWithDiffIngredients, "AllowStackWithDiffIngredients", false);
             Scribe_Values.Look(ref VitaminsFallCoeff, "vitaminsFallCoeff", 1f);
             Scribe_Values.Look(ref ProteinsFallCoeff, "proteinsFallCoeff", 1f);
             Scribe_Values.Look(ref CarbohydratesFallCoeff, "carbohydratesFallCoeff", 1f);
